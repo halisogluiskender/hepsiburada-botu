@@ -71,7 +71,7 @@ class HepsiBurada
     /**
      * Mağazaya ait ürüler Listeleniyor
      * @param string $magaza
-     * @param string $sayfala
+     * @param string $sayfa
      * @return array
      */
 
@@ -79,10 +79,11 @@ class HepsiBurada
     {
         $items = array();
         $page = $sayfa ? '&sayfa=' . $sayfa : null;
-        $hepsiMagaza = self::Curl("https://www.hepsiburada.com/magaza/" . $magaza . $page);
+        $hepsiMagaza = self::Curl("https://www.hepsiburada.com/magaza/" . self::permalink($magaza) . $page);
         // Mağaza Başlığı
         preg_match('@<h1 class="search-results-title">(.*?)</h1>@', $hepsiMagaza, $title);
         $items['magazaTitle'] = trim($title[1]);
+        print_r($items['magazaTitle']);
         preg_match_all('@<div class="contain-lg-3 contain-md-3 contain-sm-3 fluid with-bottom-border">            (.*?)    </div></div>            @', $hepsiMagaza, $result);
         $UlListe = $result[1][0];
         preg_match_all('@<ul class="product-list results-container do-flex " data-bind=\'css: {grid: isGridSelected, list: isListSelected}\'>                ﻿    (.*?)            </ul>    @', $UlListe, $result1);
@@ -118,7 +119,7 @@ class HepsiBurada
     static function Sayfala($magaza)
     {
         $pageNum = array();
-        $hepsiMagaza = self::Curl("https://www.hepsiburada.com/magaza/" . $magaza);
+        $hepsiMagaza = self::Curl("https://www.hepsiburada.com/magaza/" . self::permalink($magaza));
         preg_match_all('@<div class="contain-lg-3 contain-md-3 contain-sm-3 fluid with-bottom-border">            (.*?)    </div></div>            @', $hepsiMagaza, $result);
         $UlListe = $result[1][0];
 
@@ -127,7 +128,7 @@ class HepsiBurada
         preg_match_all('@<li>                            <a href="(.*?)" class="(.*?)">(.*?)</a>            </li>@', $sayfalaLi, $sayfaNo);
         $pageNum['PAGINATION']['NUMBER'] = $sayfaNo[3];
         foreach ($sayfaNo[3] as $sNo) {
-            $pageNum['PAGINATION']['URL'][] = '?magaza=' . $magaza . '&sayfa=' . $sNo;
+            $pageNum['PAGINATION']['URL'][] = '?magaza=' . self::permalink($magaza) . '&sayfa=' . $sNo;
         }
 
         return $pageNum;
@@ -141,7 +142,7 @@ class HepsiBurada
 
     static function Detay($Link, $magaza)
     {
-        $Detay = self::Curl("https://www.hepsiburada.com/" . $Link . "?magaza=" . $magaza);
+        $Detay = self::Curl("https://www.hepsiburada.com/" . $Link . "?magaza=" . self::permalink($magaza));
 
         $data['PRODUCT'] = array();
         preg_match_all('@<span class="variant-name">(.*?)</span>@', $Detay, $variant);
